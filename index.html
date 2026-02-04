@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <title>ค้นหาบุคลากร</title>
+  <style>
+    body {
+      font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #e0f7fa, #f4f6f9);
+      color: #333;
+      text-align: center;
+      padding: 40px;
+    }
+    h2 { color: #2c3e50; margin-bottom: 20px; }
+    .search-box { margin-bottom: 20px; }
+    input {
+      padding: 12px;
+      width: 250px;
+      border-radius: 25px;
+      border: 1px solid #ccc;
+      font-size: 14px;
+      outline: none;
+      transition: 0.3s;
+    }
+    input:focus {
+      border-color: #3498db;
+      box-shadow: 0 0 8px rgba(52,152,219,0.3);
+    }
+    button {
+      padding: 12px 20px;
+      margin-left: 10px;
+      border-radius: 25px;
+      border: none;
+      background: #3498db;
+      color: white;
+      font-size: 14px;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+    button:hover { background: #2980b9; }
+    table {
+      margin: 30px auto;
+      border-collapse: collapse;
+      width: 90%;
+      background: white;
+      border-radius: 8px;
+      overflow: hidden;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+    th, td {
+      padding: 14px;
+      border-bottom: 1px solid #ddd;
+      text-align: center;
+    }
+    th {
+      background: #3498db;
+      color: white;
+      font-weight: 600;
+    }
+    tr:nth-child(even) { background: #f9f9f9; }
+    tr:hover { background: #f1f1f1; }
+    #result { margin-top: 20px; }
+  </style>
+</head>
+<body>
+  <h2>ค้นหาข้อมูลผู้ใช้งาน</h2>
+  <h3>โปรดกรอกข้อมูลของท่าน เช่น ชื่อ-นามสกุล</h3>
+  <div class="search-box">
+    <input type="text" id="searchInput" placeholder="กรอกรหัสหรือชื่อ">
+    <button onclick="searchData()">ค้นหา</button>
+    <button onclick="goToLogin()">เข้าสู่ระบบ Admin</button>
+  </div>
+  <div id="result"></div>
+
+  <script>
+    let excelData = [];
+
+    // โหลดข้อมูลจาก localStorage ที่ Admin อัปโหลดไว้
+    function loadExcel() {
+      const stored = localStorage.getItem("excelData");
+      if (stored) {
+        excelData = JSON.parse(stored);
+      } else {
+        alert("ยังไม่มีฐานข้อมูล กรุณาให้ Admin อัปโหลดไฟล์ก่อน");
+      }
+    }
+
+    loadExcel();
+
+    function searchData() {
+      const query = document.getElementById("searchInput").value.trim();
+
+      if (query === "") {
+        alert("โปรดกรอกข้อมูลก่อนทำการค้นหา");
+        return;
+      }
+
+      // ข้ามหัวตาราง (index 0)
+      let filtered = excelData.slice(1).filter(row =>
+        row.some(cell => cell && cell.toString().includes(query))
+      );
+
+      if (filtered.length === 0) {
+        document.getElementById("result").innerHTML =
+          "<p style='color:red;'>ไม่พบข้อมูล โปรดตรวจสอบตัวสะกด</p>";
+        return;
+      }
+
+      let table = "<table><tr><th>ลำดับ</th><th>ชื่อ-นามสกุล</th><th>Email</th><th>ตำแหน่ง</th><th>Username</th></tr>";
+      filtered.forEach(row => {
+        const fullName = `${row[1]} ${row[2]} ${row[3] || ""}`;
+        table += `<tr>
+                    <td>${row[0]}</td>
+                    <td>${fullName}</td>
+                    <td>${row[4]}</td>
+                    <td>${row[5]}</td>
+                    <td>${row[8]}</td>
+                  </tr>`;
+      });
+      table += "</table>";
+
+      document.getElementById("result").innerHTML = table;
+    }
+
+    function goToLogin() {
+      window.location.href = "admin.html";
+    }
+  </script>
+</body>
+</html>

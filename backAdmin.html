@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <title>Upload Database</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+  <style>
+    body {
+      font-family: "Segoe UI", sans-serif;
+      background: linear-gradient(135deg, #fdfbfb, #ebedee);
+      text-align: center;
+      padding: 50px;
+    }
+    h2 { color: #2c3e50; }
+
+    /* ซ่อน input file เดิม */
+    input[type="file"] {
+      display: none;
+    }
+
+    /* ปุ่ม custom */
+    .custom-file-upload {
+      display: inline-block;
+      padding: 12px 25px;
+      border-radius: 30px;
+      background: #3498db;
+      color: white;
+      cursor: pointer;
+      font-size: 14px;
+      transition: 0.3s;
+    }
+    .custom-file-upload:hover {
+      background: #2980b9;
+    }
+
+    #status {
+      margin-top: 20px;
+      font-weight: bold;
+      color: green;
+    }
+    button {
+      margin-top: 20px;
+      padding: 12px 20px;
+      border-radius: 25px;
+      border: none;
+      background: #3498db;
+      color: white;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+    button:hover { background: #2980b9; }
+  </style>
+</head>
+<body>
+  <h2>อัปโหลดไฟล์ Excel เพื่อเป็นฐานข้อมูล</h2>
+
+  <!-- ปุ่ม custom ที่เชื่อมกับ input file -->
+  <label for="fileInput" class="custom-file-upload">📂 เลือกไฟล์ Excel</label>
+  <input type="file" id="fileInput" accept=".xlsx">
+
+  <p id="status"></p>
+
+  <button onclick="goToUser()">ไปหน้าผู้ใช้งาน</button>
+  <button onclick="clearData()">ล้างฐานข้อมูล</button>
+
+<script>
+  function clearData() {
+    localStorage.removeItem("excelData");
+    alert("ข้อมูลทั้งหมดถูกล้างแล้ว ผู้ใช้จะไม่สามารถค้นหาได้จนกว่าจะอัปโหลดใหม่");
+  }
+
+  document.getElementById("fileInput").addEventListener("change", async (event) => {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    const arrayBuffer = await file.arrayBuffer();
+    const workbook = XLSX.read(arrayBuffer, {type: "array"});
+    const sheetName = workbook.SheetNames[0];
+    const worksheet = workbook.Sheets[sheetName];
+    const excelData = XLSX.utils.sheet_to_json(worksheet, {header:1});
+
+    localStorage.removeItem("excelData");
+    localStorage.setItem("excelData", JSON.stringify(excelData));
+
+    document.getElementById("status").innerText = "✅ อัปโหลดสำเร็จ! ผู้ใช้สามารถค้นหาได้แล้ว";
+  });
+
+  function goToUser() {
+    window.location.href = "index.html";
+  }
+</script>
+</body>
+</html>
